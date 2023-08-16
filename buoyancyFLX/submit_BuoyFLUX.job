@@ -1,0 +1,22 @@
+#!/bin/bash
+#MSUB -r bouyFLUX_c # Request name
+#MSUB -n 16 # Number of tasks to use
+#MSUB -T 7200 # Elapsed time limit in seconds
+#MSUB -o ./OUT/STDoutput_%I.o # Standard output. %I is the job id
+#MSUB -e ./OUT/STDoutput_%I.e # Error output. %I is the job id
+#MSUB -q xlarge # Queue
+#MSUB -A gen7420
+#MSUB -m work,scratch
+
+# Handleler of parallel computation.
+module load glost
+
+# Load required modules.
+# module load netcdf-fortran/4.5.3
+module load nco
+module load netcdf-fortran/4.4.4
+
+cd /ccc/work/cont003/gen7420/martinej/compute_buoyflux
+
+# Run in parallel the computation
+ccc_mprun glost_launch taskfile.list

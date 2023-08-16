@@ -1,0 +1,44 @@
+#!/bin/bash
+#MSUB -r store_bFLUX<XXMONTHXX>_FQ<XXFREQXX>_F<XXFTYPEXX> # Request name
+#MSUB -n 1 # Number of tasks to use
+#MSUB -T 10800 # Elapsed time limit in seconds
+#MSUB -o ./OUT/store_bFLUX<XXMONTHXX>_FQ<XXFREQXX>_F<XXFTYPEXX>.o%I
+#MSUB -e ./OUT/store_bFLUX<XXMONTHXX>_FQ<XXFREQXX>_F<XXFTYPEXX>.e%I
+#MSUB -q xlarge # Queue
+#MSUB -A gen7420
+#MSUB -m work,scratch,store
+#MSUB -@ jmartine@ifremer.fr:begin,end
+
+
+COMPUTATION=BUOYFLX
+CYEAR=<XXYEARXX>
+CMONTH=<XXMONTHXX>
+FREQ=<XXFREQXX>
+TFTYPE=<XXFTYPEXX>
+
+
+DATAIN="/ccc/cont003/dsku/blanchet/home/user/ifremer/martinej/scratch/$COMPUTATION/"
+
+STOREDIR=/ccc/store/cont003/gen7420/gen7420/SEDNA-DELTA/DIAGS/$COMPUTATION
+
+cd ${DATAIN}
+
+# Find all files with the pattern
+filestr=`find "$DATAIN" -type f -name "*y${CYEAR}m${CMONTH}*${TFTYPE}.nc"`
+
+# Make array of the string
+files=($filestr)
+
+echo $gridT
+
+STOREOUT=${STOREDIR}/${CYEAR}/${CMONTH}/${FREQ}
+if [ ! -d ${STOREOUT} ] ; then mkdir -p ${STOREOUT} ; fi
+echo " Month & files treated: ${CMONTH} ${TFTYPE} "
+
+delimiter="y${CYEAR}"
+divfilename=${files[1]%%"$delimiter"*}
+
+tar -cvf ${divfilename}y${CYEAR}m${CMONTH}_${FREQ}_${TFTYPE}.tar $filestr
+
+mv ${divfilename}y${CYEAR}m${CMONTH}_${FREQ}_${TFTYPE}.tar  ${STOREOUT}/.
+

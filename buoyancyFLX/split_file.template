@@ -1,0 +1,30 @@
+#/bin/bash
+
+# Define input variables
+file_month=$1
+outputfile=$2
+time=$3
+
+counter=$(printf "%02d" $time)
+
+# Check if file has been divided
+if grep -Fxq ${outputfile}d${counter}.1d_flxT.nc "$(dirname "$outputfile")"/divided_files.txt
+then
+    exit 0  # code if found
+else
+    # Divide files.
+    # Load modules needed:
+    # module remove netcdf-c > /dev/null
+    # module load nco > /dev/null
+    # Get number of times in  montly files
+    time_string=`ncks -m $file_month | grep 'time_counter' | head -n 1`
+    TIMES=$(echo $time_string | sed 's/[^0-9]*//g') ;
+    # Split montly into daily files
+    echo "Splitting monthly to daily"
+    ncks -C -v empmr,qt -d time_counter,$time,$time $file_month ${outputfile}
+    #done
+    # module remove nco  > /dev/null
+    echo ${outputfile}d${counter}.1d_flxT.nc >> "$(dirname "$outputfile")"/divided_files.txt
+
+fi
+
